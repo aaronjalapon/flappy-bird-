@@ -1,117 +1,521 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-import '../models/bird.dart';
 import '../models/bird_customization.dart';
-import '../models/map_data.dart';
-import '../models/pipe.dart';
+import '../utils/sound_manager.dart';
 
-class GamePainter extends CustomPainter {
-  final Bird bird;
-  final List<Pipe> pipes;
-  final MapData mapData;
-  final BirdCustomization? birdCustomization;
+class BirdCustomizationScreen extends StatefulWidget {
+  const BirdCustomizationScreen({super.key});
 
-  GamePainter({
-    required this.bird,
-    required this.pipes,
-    required this.mapData,
-    this.birdCustomization,
+  @override
+  State<BirdCustomizationScreen> createState() =>
+      _BirdCustomizationScreenState();
+}
+
+class _BirdCustomizationScreenState extends State<BirdCustomizationScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _floatController;
+  late Animation<double> _floatAnimation;
+
+  // Customization options
+  int _selectedBirdIndex = 0;
+
+  final List<BirdCharacter> _birdCharacters = [
+    BirdCharacter(
+      name: 'Robert',
+      icon: '🐦',
+      description: 'Robert Jhon Aracena',
+      isUnlocked: true,
+    ),
+    BirdCharacter(
+      name: 'Iron Birdie',
+      icon: '🤖',
+      description: 'Metal Scraps',
+      isUnlocked: true,
+    ),
+    BirdCharacter(
+      name: 'Sierra Madre',
+      icon: '💪',
+      description: 'Luzon Buff',
+      isUnlocked: true,
+    ),
+    BirdCharacter(
+      name: 'Eagle',
+      icon: '🦅',
+      description: 'Philippine Eagle',
+      isUnlocked: true,
+    ),
+    BirdCharacter(
+      name: 'Hawk',
+      icon: '🦜',
+      description: 'Cutie Patotie',
+      isUnlocked: true,
+    ),
+    BirdCharacter(
+      name: 'Aaron',
+      icon: '💪',
+      description: 'Aaron Jalapon',
+      isUnlocked: true,
+    ),
+    BirdCharacter(
+      name: 'Lucifer',
+      icon: '😇',
+      description: 'Divine Guardian',
+      isUnlocked: true,
+    ),
+    BirdCharacter(
+      name: 'Philippine Blooper',
+      icon: '🇵🇭',
+      description: 'Guinness World of Bad Records',
+      isUnlocked: true,
+    ),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCustomization();
+    _floatController = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _floatAnimation = Tween<double>(begin: -10, end: 10).animate(
+      CurvedAnimation(parent: _floatController, curve: Curves.easeInOut),
+    );
+  }
+
+  Future<void> _loadCustomization() async {
+    final customization = await BirdCustomization.load();
+    setState(() {
+      _selectedBirdIndex = customization.birdIndex;
+    });
+  }
+
+  @override
+  void dispose() {
+    _floatController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF1A237E),
+              Color(0xFF283593),
+              Color(0xFF3F51B5),
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Header
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_back, color: Colors.white),
+                        onPressed: () {
+                          SoundManager().playButton();
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Choose Your Bird',
+                            style: GoogleFonts.fredoka(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            'Select your character!',
+                            style: GoogleFonts.bubblegumSans(
+                              fontSize: 14,
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Bird Preview Section
+              Container(
+                margin:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.3),
+                    width: 2,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      'Preview',
+                      style: GoogleFonts.fredoka(
+                        fontSize: 16,
+                        color: Colors.white70,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Animated Bird Preview
+                    AnimatedBuilder(
+                      animation: _floatAnimation,
+                      builder: (context, child) {
+                        return Transform.translate(
+                          offset: Offset(0, _floatAnimation.value),
+                          child: child,
+                        );
+                      },
+                      child: _buildBirdPreview(),
+                    ),
+
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        _birdCharacters[_selectedBirdIndex].name,
+                        style: GoogleFonts.fredoka(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Character Selection
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Text(
+                  'Select your character!',
+                  style: GoogleFonts.fredoka(
+                    fontSize: 16,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 15),
+              Expanded(
+                child: _buildCharactersTab(),
+              ),
+
+              // Apply Button
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF8E44AD), Color(0xFFC39BD3)],
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.purple.withOpacity(0.5),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(20),
+                      onTap: () async {
+                        SoundManager().playButton();
+                        // Save customization settings
+                        final customization = BirdCustomization(
+                          birdIndex: _selectedBirdIndex,
+                          colorIndex: 0, // Default color
+                        );
+                        await customization.save();
+
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Bird selected! 🐦',
+                                style: GoogleFonts.fredoka(),
+                              ),
+                              backgroundColor: Colors.green,
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          );
+                          Navigator.pop(context);
+                        }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.check_circle, color: Colors.white),
+                            const SizedBox(width: 10),
+                            Text(
+                              'SELECT BIRD',
+                              style: GoogleFonts.fredoka(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBirdPreview() {
+    final size = 100.0;
+
+    return SizedBox(
+      width: 120,
+      height: 120,
+      child: Center(
+        child: CustomPaint(
+          size: Size(size, size),
+          painter: CharacterBirdPainter(
+            primaryColor: const Color(0xFFFDD835),
+            secondaryColor: const Color(0xFFF57F17),
+            birdType: _selectedBirdIndex,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCharactersTab() {
+    return GridView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 1.2,
+        crossAxisSpacing: 15,
+        mainAxisSpacing: 15,
+      ),
+      itemCount: _birdCharacters.length,
+      itemBuilder: (context, index) {
+        final character = _birdCharacters[index];
+        final isSelected = _selectedBirdIndex == index;
+
+        return GestureDetector(
+          onTap: () {
+            if (character.isUnlocked) {
+              setState(() {
+                _selectedBirdIndex = index;
+              });
+              SoundManager().playButton();
+            }
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color:
+                    isSelected ? Colors.purple : Colors.white.withOpacity(0.3),
+                width: isSelected ? 3 : 2,
+              ),
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: Colors.purple.withOpacity(0.5),
+                        blurRadius: 20,
+                        spreadRadius: 3,
+                      ),
+                    ]
+                  : [],
+            ),
+            child: Stack(
+              children: [
+                Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 60,
+                        height: 60,
+                        child: CustomPaint(
+                          painter: CharacterBirdPainter(
+                            primaryColor: const Color(0xFFFDD835),
+                            secondaryColor: const Color(0xFFF57F17),
+                            birdType: index,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        character.name,
+                        style: GoogleFonts.fredoka(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        character.description,
+                        style: GoogleFonts.bubblegumSans(
+                          fontSize: 11,
+                          color: Colors.white70,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+                if (isSelected)
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.check,
+                        color: Colors.green,
+                        size: 16,
+                      ),
+                    ),
+                  ),
+                if (!character.isUnlocked)
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.lock,
+                          color: Colors.white70,
+                          size: 30,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+// Models for customization options
+class BirdCharacter {
+  final String name;
+  final String icon;
+  final String description;
+  final bool isUnlocked;
+
+  BirdCharacter({
+    required this.name,
+    required this.icon,
+    required this.description,
+    required this.isUnlocked,
+  });
+}
+
+class BirdColor {
+  final String name;
+  final Color primaryColor;
+  final Color secondaryColor;
+  final bool isUnlocked;
+  final String? unlockRequirement;
+
+  BirdColor({
+    required this.name,
+    required this.primaryColor,
+    required this.secondaryColor,
+    required this.isUnlocked,
+    this.unlockRequirement,
+  });
+}
+
+// Custom painter for different bird characters
+class CharacterBirdPainter extends CustomPainter {
+  final Color primaryColor;
+  final Color secondaryColor;
+  final int birdType; // 0=Default, 1=Iron, 2=Hulk, 3=Eagle, 4=Hawk
+
+  CharacterBirdPainter({
+    required this.primaryColor,
+    required this.secondaryColor,
+    required this.birdType,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Draw stars for space and moon maps
-    if (mapData.name == 'Space' || mapData.name == 'Moon') {
-      _drawStars(canvas, size);
-    }
-
-    // Draw pipes
-    final pipePaint = Paint()
-      ..color = mapData.pipeColor
-      ..style = PaintingStyle.fill;
-
-    final pipeOutlinePaint = Paint()
-      ..color = Colors.black
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
-
-    for (var pipe in pipes) {
-      // Top pipe
-      final topRect = pipe.getTopRect(size.height);
-      canvas.drawRect(topRect, pipePaint);
-      canvas.drawRect(topRect, pipeOutlinePaint);
-
-      // Draw pipe cap
-      final topCapRect = Rect.fromLTWH(
-        topRect.left - 5,
-        topRect.bottom - 30,
-        topRect.width + 10,
-        30,
-      );
-      canvas.drawRect(topCapRect, pipePaint);
-      canvas.drawRect(topCapRect, pipeOutlinePaint);
-
-      // Bottom pipe
-      final bottomRect = pipe.getBottomRect(size.height);
-      canvas.drawRect(bottomRect, pipePaint);
-      canvas.drawRect(bottomRect, pipeOutlinePaint);
-
-      // Draw pipe cap
-      final bottomCapRect = Rect.fromLTWH(
-        bottomRect.left - 5,
-        bottomRect.top,
-        bottomRect.width + 10,
-        30,
-      );
-      canvas.drawRect(bottomCapRect, pipePaint);
-      canvas.drawRect(bottomCapRect, pipeOutlinePaint);
-    }
-
-    // Draw bird
-    _drawBird(canvas, size);
-  }
-
-  void _drawStars(Canvas canvas, Size size) {
-    final starPaint = Paint()
-      ..color = Colors.white.withOpacity(0.8)
-      ..style = PaintingStyle.fill;
-
-    final random = math.Random(42); // Fixed seed for consistent stars
-    for (int i = 0; i < 50; i++) {
-      final x = random.nextDouble() * size.width;
-      final y = random.nextDouble() * size.height;
-      final radius = random.nextDouble() * 2 + 1;
-      canvas.drawCircle(Offset(x, y), radius, starPaint);
-    }
-  }
-
-  void _drawBird(Canvas canvas, Size size) {
-    final birdRect = bird.getRect();
-    final center = Offset(birdRect.center.dx, birdRect.center.dy);
-    final radius = birdRect.width / 2;
-
-    // Get customization colors and bird type
-    final colorScheme = birdCustomization?.colorScheme ??
-        BirdColorScheme(
-          primary: Colors.yellow.shade300,
-          secondary: Colors.yellow.shade700,
-          name: 'Classic Yellow',
-        );
-
-    final birdType = birdCustomization?.birdIndex ?? 0;
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2.5;
 
     // Shadow for depth
     final shadowPaint = Paint()
       ..color = Colors.black.withOpacity(0.3)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
-    canvas.drawCircle(center.translate(3, 4), radius, shadowPaint);
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
+    canvas.drawCircle(center.translate(2, 3), radius, shadowPaint);
 
-    // Draw bird based on type
     switch (birdType) {
       case 0:
-        _drawDefaultBird(canvas, center, radius, colorScheme);
+        _drawDefaultBird(canvas, center, radius);
         break;
       case 1:
         _drawIronBird(canvas, center, radius);
@@ -137,34 +541,31 @@ class GamePainter extends CustomPainter {
     }
   }
 
-  // Default Bird - Classic round bird with custom colors
-  void _drawDefaultBird(Canvas canvas, Offset center, double radius,
-      BirdColorScheme colorScheme) {
+  // Default Bird - Classic round bird
+  void _drawDefaultBird(Canvas canvas, Offset center, double radius) {
     // Bird body with gradient
     final bodyGradient = Paint()
       ..shader = RadialGradient(
-        colors: [colorScheme.primary, colorScheme.secondary],
+        colors: [primaryColor, secondaryColor],
       ).createShader(Rect.fromCircle(center: center, radius: radius));
     canvas.drawCircle(center, radius, bodyGradient);
 
     // Body outline
     final bodyOutlinePaint = Paint()
-      ..color = colorScheme.secondary.withOpacity(0.8)
+      ..color = secondaryColor.withOpacity(0.8)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.5;
     canvas.drawCircle(center, radius, bodyOutlinePaint);
 
-    // Wing with animation
+    // Wing
     final wingPaint = Paint()
       ..shader = LinearGradient(
-        colors: [colorScheme.primary.withOpacity(0.8), colorScheme.secondary],
+        colors: [primaryColor.withOpacity(0.8), secondaryColor],
       ).createShader(Rect.fromCircle(center: center, radius: radius));
 
-    final wingAngle = (bird.velocity / 10) * math.pi / 4;
     final wingPath = Path();
     wingPath.moveTo(center.dx, center.dy);
-    wingPath.lineTo(center.dx - radius * 0.8,
-        center.dy + radius * 0.5 + math.sin(wingAngle) * 12);
+    wingPath.lineTo(center.dx - radius * 0.8, center.dy + radius * 0.5);
     wingPath.lineTo(center.dx - radius * 0.4, center.dy + radius * 0.8);
     wingPath.close();
     canvas.drawPath(wingPath, wingPaint);
@@ -202,11 +603,9 @@ class GamePainter extends CustomPainter {
       ..color = const Color(0xFF78909C)
       ..style = PaintingStyle.fill;
 
-    final wingAngle = (bird.velocity / 10) * math.pi / 6;
     final wingPath = Path();
     wingPath.moveTo(center.dx - radius * 0.2, center.dy);
-    wingPath.lineTo(center.dx - radius * 0.9,
-        center.dy + radius * 0.3 + math.sin(wingAngle) * 10);
+    wingPath.lineTo(center.dx - radius * 0.9, center.dy + radius * 0.3);
     wingPath.lineTo(center.dx - radius * 0.7, center.dy + radius * 0.6);
     wingPath.lineTo(center.dx - radius * 0.4, center.dy + radius * 0.5);
     wingPath.close();
@@ -274,6 +673,7 @@ class GamePainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.5;
 
+    // Chest muscles
     final musclePath = Path();
     musclePath.moveTo(center.dx, center.dy - radius * 0.5);
     musclePath.quadraticBezierTo(center.dx - radius * 0.3, center.dy,
@@ -292,11 +692,9 @@ class GamePainter extends CustomPainter {
         colors: [const Color(0xFF66BB6A), const Color(0xFF2E7D32)],
       ).createShader(Rect.fromCircle(center: center, radius: radius));
 
-    final wingAngle = (bird.velocity / 10) * math.pi / 4;
     final wingPath = Path();
     wingPath.moveTo(center.dx - radius * 0.1, center.dy - radius * 0.2);
-    wingPath.lineTo(center.dx - radius * 0.9,
-        center.dy + radius * 0.4 + math.sin(wingAngle) * 12);
+    wingPath.lineTo(center.dx - radius * 0.9, center.dy + radius * 0.4);
     wingPath.lineTo(center.dx - radius * 0.5, center.dy + radius * 0.9);
     wingPath.lineTo(center.dx - radius * 0.2, center.dy + radius * 0.6);
     wingPath.close();
@@ -354,6 +752,7 @@ class GamePainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
 
+    // Draw feather patterns
     for (int i = 0; i < 8; i++) {
       final angle = (i / 8) * 3.14159 * 2;
       final startX = center.dx + radius * 0.3 * math.cos(angle);
@@ -368,10 +767,10 @@ class GamePainter extends CustomPainter {
       ..color = const Color(0xFF4E342E)
       ..style = PaintingStyle.fill;
 
-    final wingAngle = (bird.velocity / 10) * math.pi / 4;
+    // Primary feathers
     for (int i = 0; i < 4; i++) {
       final featherPath = Path();
-      final offsetY = i * radius * 0.3 + math.sin(wingAngle) * (4 - i) * 3;
+      final offsetY = i * radius * 0.3;
       featherPath.moveTo(center.dx - radius * 0.1, center.dy + offsetY);
       featherPath.lineTo(
           center.dx - radius * 1.4, center.dy + radius * 0.4 + offsetY);
@@ -398,6 +797,7 @@ class GamePainter extends CustomPainter {
         radius * 0.32,
         eyeWhitePaint);
 
+    // Sharp pupil
     final pupilPaint = Paint()
       ..color = const Color(0xFF1A1A1A)
       ..style = PaintingStyle.fill;
@@ -406,6 +806,7 @@ class GamePainter extends CustomPainter {
         radius * 0.12,
         pupilPaint);
 
+    // Eye shine for intensity
     final shinePaint = Paint()
       ..color = const Color(0xFFFFD700)
       ..style = PaintingStyle.fill;
@@ -489,6 +890,7 @@ class GamePainter extends CustomPainter {
       ..color = const Color(0xFF4E342E).withOpacity(0.5)
       ..style = PaintingStyle.fill;
 
+    // Create spotted pattern
     canvas.drawCircle(
         Offset(center.dx - radius * 0.3, center.dy - radius * 0.2),
         3,
@@ -512,11 +914,9 @@ class GamePainter extends CustomPainter {
         colors: [const Color(0xFFBCAAA4), const Color(0xFF6D4C41)],
       ).createShader(Rect.fromCircle(center: center, radius: radius));
 
-    final wingAngle = (bird.velocity / 10) * math.pi / 4;
     final wingPath = Path();
     wingPath.moveTo(center.dx - radius * 0.1, center.dy - radius * 0.3);
-    wingPath.lineTo(center.dx - radius * 1.0,
-        center.dy + radius * 0.2 + math.sin(wingAngle) * 12);
+    wingPath.lineTo(center.dx - radius * 1.0, center.dy + radius * 0.2);
     wingPath.lineTo(center.dx - radius * 0.9, center.dy + radius * 0.5);
     wingPath.lineTo(center.dx - radius * 0.3, center.dy + radius * 0.4);
     wingPath.close();
@@ -746,28 +1146,24 @@ class GamePainter extends CustomPainter {
       bodyHairPaint,
     );
 
-    // Muscular arms/wings with animation - bigger and more prominent
+    // Muscular arms/wings - bigger and more prominent
     final armPaint = Paint()
       ..shader = LinearGradient(
         colors: [const Color(0xFFFFCC80), const Color(0xFFF57C00)],
       ).createShader(Rect.fromCircle(center: center, radius: radius));
 
-    final wingAngle = (bird.velocity / 10) * math.pi / 4;
     final armPath = Path();
     armPath.moveTo(center.dx - radius * 0.35, center.dy - radius * 0.2);
-    armPath.lineTo(center.dx - radius * 1.3,
-        center.dy + radius * 0.2 + math.sin(wingAngle) * 12);
-    armPath.lineTo(center.dx - radius * 1.2,
-        center.dy + radius * 0.6 + math.sin(wingAngle) * 8);
+    armPath.lineTo(center.dx - radius * 1.3, center.dy + radius * 0.2);
+    armPath.lineTo(center.dx - radius * 1.2, center.dy + radius * 0.6);
     armPath.lineTo(center.dx - radius * 0.3, center.dy + radius * 0.4);
     armPath.close();
     canvas.drawPath(armPath, armPaint);
     canvas.drawPath(armPath, musclePaint);
 
-    // Bicep bulge - positioned on larger arm with animation
+    // Bicep bulge - positioned on larger arm
     canvas.drawCircle(
-      Offset(center.dx - radius * 0.85,
-          center.dy + radius * 0.25 + math.sin(wingAngle) * 6),
+      Offset(center.dx - radius * 0.85, center.dy + radius * 0.25),
       radius * 0.2,
       Paint()
         ..color = const Color(0xFFE65100)
@@ -854,8 +1250,8 @@ class GamePainter extends CustomPainter {
     canvas.drawArc(
       Rect.fromCircle(
           center: Offset(center.dx, center.dy - radius * 0.15),
-          radius: radius * 0.85),
-      -3.3,
+          radius: radius * 0.91),
+      -3.0,
       2.3,
       false,
       sweatbandPaint,
@@ -898,16 +1294,15 @@ class GamePainter extends CustomPainter {
       haloPaint,
     );
 
-    // Large angel wings with 3 primary feathers each - bigger than eagle with animation
+    // Large angel wings with 3 primary feathers each - bigger than eagle
     final wingFeatherPaint = Paint()
       ..color = const Color(0xFFFAFAFA)
       ..style = PaintingStyle.fill;
 
-    final wingAngle = (bird.velocity / 10) * math.pi / 4;
     // Primary wing feathers (3 large feathers)
     for (int i = 0; i < 3; i++) {
       final featherPath = Path();
-      final offsetY = i * radius * 0.4 + math.sin(wingAngle) * (3 - i) * 4;
+      final offsetY = i * radius * 0.4;
       featherPath.moveTo(
           center.dx - radius * 0.05, center.dy + offsetY - radius * 0.1);
       featherPath.lineTo(
@@ -1042,26 +1437,20 @@ class GamePainter extends CustomPainter {
       canvas.drawPath(hairPath, hairHighlight);
     }
 
-    // Three feather wings with animation
+    // Three feather wings
     final featherPaint = Paint()
       ..color = const Color(0xFF654321)
       ..style = PaintingStyle.fill;
 
-    final wingAngle = (bird.velocity / 10) * math.pi / 4;
     for (int i = 0; i < 3; i++) {
       final featherPath = Path();
       final offsetY = i * radius * 0.3;
-      final animOffset = math.sin(wingAngle) * (3 - i) * 3;
       featherPath.moveTo(
           center.dx - radius * 0.1, center.dy + offsetY - radius * 0.1);
       featherPath.lineTo(
-        center.dx - radius * 1.2,
-        center.dy + radius * 0.3 + offsetY + animOffset,
-      );
+          center.dx - radius * 1.2, center.dy + radius * 0.3 + offsetY);
       featherPath.lineTo(
-        center.dx - radius * 1.1,
-        center.dy + radius * 0.55 + offsetY + animOffset,
-      );
+          center.dx - radius * 1.1, center.dy + radius * 0.55 + offsetY);
       featherPath.lineTo(
           center.dx - radius * 0.2, center.dy + radius * 0.3 + offsetY);
       featherPath.close();
@@ -1137,9 +1526,7 @@ class GamePainter extends CustomPainter {
     beakPath.close();
     canvas.drawPath(beakPath, beakPaint);
 
-    // Philippine flag pole on back/rear of the bird with slight animation
-    final flagSway = math.sin(wingAngle * 0.5) * 3;
-
+    // Philippine flag pole on back/rear of the bird
     // Flag pole (brown stick) - positioned at the rear
     final polePaint = Paint()
       ..color = const Color(0xFF654321)
@@ -1148,7 +1535,7 @@ class GamePainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
     canvas.drawLine(
       Offset(center.dx - radius * 0.7, center.dy + radius * 0.4),
-      Offset(center.dx - radius * 0.7 + flagSway, center.dy - radius * 0.8),
+      Offset(center.dx - radius * 0.7, center.dy - radius * 0.8),
       polePaint,
     );
 
@@ -1158,10 +1545,9 @@ class GamePainter extends CustomPainter {
       ..color = Colors.white
       ..style = PaintingStyle.fill;
     final whiteTriangle = Path();
-    whiteTriangle.moveTo(
-        center.dx - radius * 0.7 + flagSway, center.dy - radius * 0.8);
-    whiteTriangle.lineTo(center.dx + flagSway, center.dy - radius * 1.0);
-    whiteTriangle.lineTo(center.dx + flagSway, center.dy - radius * 0.6);
+    whiteTriangle.moveTo(center.dx - radius * 0.7, center.dy - radius * 0.8);
+    whiteTriangle.lineTo(center.dx, center.dy - radius * 1.0);
+    whiteTriangle.lineTo(center.dx, center.dy - radius * 0.6);
     whiteTriangle.close();
     canvas.drawPath(whiteTriangle, flagWhitePaint);
 
@@ -1171,7 +1557,7 @@ class GamePainter extends CustomPainter {
       ..style = PaintingStyle.fill;
     canvas.drawRect(
       Rect.fromLTWH(
-        center.dx + flagSway,
+        center.dx,
         center.dy - radius * 1.0,
         radius * 0.5,
         radius * 0.2,
@@ -1185,7 +1571,7 @@ class GamePainter extends CustomPainter {
       ..style = PaintingStyle.fill;
     canvas.drawRect(
       Rect.fromLTWH(
-        center.dx + flagSway,
+        center.dx,
         center.dy - radius * 0.8,
         radius * 0.5,
         radius * 0.2,
@@ -1198,7 +1584,7 @@ class GamePainter extends CustomPainter {
       ..color = const Color(0xFFFCD116)
       ..style = PaintingStyle.fill;
     canvas.drawCircle(
-      Offset(center.dx - radius * 0.45 + flagSway, center.dy - radius * 0.8),
+      Offset(center.dx - radius * 0.45, center.dy - radius * 0.8),
       radius * 0.12,
       sunPaint,
     );
@@ -1211,13 +1597,10 @@ class GamePainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
     for (int i = 0; i < 8; i++) {
       final angle = (i * math.pi / 4);
-      final startX = center.dx -
-          radius * 0.45 +
-          flagSway +
-          math.cos(angle) * radius * 0.12;
+      final startX =
+          center.dx - radius * 0.45 + math.cos(angle) * radius * 0.12;
       final startY = center.dy - radius * 0.8 + math.sin(angle) * radius * 0.12;
-      final endX =
-          center.dx - radius * 0.45 + flagSway + math.cos(angle) * radius * 0.2;
+      final endX = center.dx - radius * 0.45 + math.cos(angle) * radius * 0.2;
       final endY = center.dy - radius * 0.8 + math.sin(angle) * radius * 0.2;
       canvas.drawLine(Offset(startX, startY), Offset(endX, endY), rayPaint);
     }
@@ -1228,17 +1611,17 @@ class GamePainter extends CustomPainter {
       ..style = PaintingStyle.fill;
     // Star positions
     canvas.drawCircle(
-      Offset(center.dx - radius * 0.35 + flagSway, center.dy - radius * 0.95),
+      Offset(center.dx - radius * 0.35, center.dy - radius * 0.95),
       radius * 0.04,
       starPaint,
     );
     canvas.drawCircle(
-      Offset(center.dx - radius * 0.2 + flagSway, center.dy - radius * 0.75),
+      Offset(center.dx - radius * 0.2, center.dy - radius * 0.75),
       radius * 0.04,
       starPaint,
     );
     canvas.drawCircle(
-      Offset(center.dx - radius * 0.35 + flagSway, center.dy - radius * 0.65),
+      Offset(center.dx - radius * 0.35, center.dy - radius * 0.65),
       radius * 0.04,
       starPaint,
     );
@@ -1251,7 +1634,7 @@ class GamePainter extends CustomPainter {
     canvas.drawPath(whiteTriangle, flagOutline);
     canvas.drawRect(
       Rect.fromLTWH(
-        center.dx + flagSway,
+        center.dx,
         center.dy - radius * 1.0,
         radius * 0.5,
         radius * 0.4,
@@ -1309,7 +1692,9 @@ class GamePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant GamePainter oldDelegate) {
-    return true; // Always repaint for animation
+  bool shouldRepaint(CharacterBirdPainter oldDelegate) {
+    return oldDelegate.primaryColor != primaryColor ||
+        oldDelegate.secondaryColor != secondaryColor ||
+        oldDelegate.birdType != birdType;
   }
 }
