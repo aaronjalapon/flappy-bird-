@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../models/achievement.dart';
 import '../models/bird.dart';
+import '../models/bird_customization.dart';
 import '../models/map_data.dart';
 import '../models/pipe.dart';
 import '../utils/achievement_manager.dart';
@@ -37,7 +38,7 @@ class _GameScreenState extends State<GameScreen> {
   double pipeSpeed = 3; // Reduced from 4 for easier gameplay
   final Random random = Random();
   bool _initialized = false;
-  
+
   // New feature managers
   final ParticleSystem particleSystem = ParticleSystem();
   final AchievementManager achievementManager = AchievementManager();
@@ -46,19 +47,29 @@ class _GameScreenState extends State<GameScreen> {
   bool usedPause = false;
   bool _audioStarted = false;
   double backgroundOffset = 0; // For scrolling background
-  
+  BirdCustomization? _birdCustomization;
+
   @override
   void initState() {
     super.initState();
     // Initialize managers
     achievementManager.loadProgress();
     soundManager.initialize();
+    _loadBirdCustomization();
     // Don't call _initGame here - it needs context
+  }
+
+  Future<void> _loadBirdCustomization() async {
+    final customization = await BirdCustomization.load();
+    setState(() {
+      _birdCustomization = customization;
+    });
   }
 
   Future<void> _startAudioIfNeeded() async {
     if (!_audioStarted) {
-      await soundManager.playGameMusic(); // Switch to ukulele music for gameplay
+      await soundManager
+          .playGameMusic(); // Switch to ukulele music for gameplay
       _audioStarted = true;
     }
   }
@@ -85,10 +96,10 @@ class _GameScreenState extends State<GameScreen> {
 
   void _startGame() {
     if (gameState != GameState.ready) return;
-    
+
     // Start game music (ukulele) when gameplay begins
     _startAudioIfNeeded();
-    
+
     setState(() {
       gameState = GameState.playing;
     });
@@ -110,8 +121,9 @@ class _GameScreenState extends State<GameScreen> {
       bird.update(widget.mapData.gravityPixels);
 
       // Scroll background
-      backgroundOffset += pipeSpeed * 0.5; // Scroll at half the pipe speed for parallax effect
-      
+      backgroundOffset +=
+          pipeSpeed * 0.5; // Scroll at half the pipe speed for parallax effect
+
       // Reset when scrolled one full image width for seamless loop
       // Image aspect ratio is 1536:672, so width = height * 2.286
       final imageWidth = MediaQuery.of(context).size.height * (1536 / 672);
@@ -134,7 +146,8 @@ class _GameScreenState extends State<GameScreen> {
 
       // Remove off-screen pipes and generate new ones
       pipes.removeWhere((pipe) => pipe.isOffScreen());
-      if (pipes.isEmpty || pipes.last.x < MediaQuery.of(context).size.width - 300) {
+      if (pipes.isEmpty ||
+          pipes.last.x < MediaQuery.of(context).size.width - 300) {
         _generatePipes();
       }
 
@@ -179,21 +192,22 @@ class _GameScreenState extends State<GameScreen> {
 
   void _gameOver() {
     gameTimer?.cancel();
-    
+
     // Create explosion effect at bird position
     particleSystem.createExplosion(bird.x, bird.y, color: Colors.red);
-    
+
     // Play hit sound
     soundManager.playHit();
-    
+
     // Check achievements
-    newAchievements = achievementManager.checkAchievements(widget.mapKey, score, usedPause);
-    
+    newAchievements =
+        achievementManager.checkAchievements(widget.mapKey, score, usedPause);
+
     // Play achievement sound if any unlocked
     if (newAchievements.isNotEmpty) {
       soundManager.playAchievement();
     }
-    
+
     setState(() {
       gameState = GameState.gameOver;
     });
@@ -203,7 +217,7 @@ class _GameScreenState extends State<GameScreen> {
     if (gameState == GameState.ready) {
       _startGame();
     }
-    
+
     if (gameState == GameState.playing) {
       setState(() {
         bird.flap();
@@ -286,7 +300,7 @@ class _GameScreenState extends State<GameScreen> {
                   // Calculate width needed to show full image height without cropping
                   const imageAspectRatio = 1536 / 672; // 2.286:1
                   final imageWidth = constraints.maxHeight * imageAspectRatio;
-                  
+
                   return ClipRect(
                     child: Stack(
                       children: List.generate(3, (index) {
@@ -298,7 +312,8 @@ class _GameScreenState extends State<GameScreen> {
                             widget.mapData.backgroundImage,
                             width: imageWidth,
                             height: constraints.maxHeight,
-                            fit: BoxFit.fitHeight, // Fits height, shows full width
+                            fit: BoxFit
+                                .fitHeight, // Fits height, shows full width
                           ),
                         );
                       }),
@@ -316,6 +331,7 @@ class _GameScreenState extends State<GameScreen> {
                   bird: bird,
                   pipes: pipes,
                   mapData: widget.mapData,
+                  birdCustomization: _birdCustomization,
                 ),
               ),
             ),
@@ -375,7 +391,8 @@ class _GameScreenState extends State<GameScreen> {
                               ],
                             ),
                             borderRadius: BorderRadius.circular(25),
-                            border: Border.all(color: Colors.white.withOpacity(0.5), width: 2),
+                            border: Border.all(
+                                color: Colors.white.withOpacity(0.5), width: 2),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.3),
@@ -512,7 +529,8 @@ class _GameScreenState extends State<GameScreen> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: Colors.white.withOpacity(0.15),
-                          border: Border.all(color: Colors.white.withOpacity(0.3), width: 3),
+                          border: Border.all(
+                              color: Colors.white.withOpacity(0.3), width: 3),
                         ),
                         child: const Icon(
                           Icons.touch_app,
@@ -539,11 +557,13 @@ class _GameScreenState extends State<GameScreen> {
                       ),
                       const SizedBox(height: 16),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
                         decoration: BoxDecoration(
                           color: widget.mapData.primaryColor.withOpacity(0.8),
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: Colors.white.withOpacity(0.5), width: 2),
+                          border: Border.all(
+                              color: Colors.white.withOpacity(0.5), width: 2),
                         ),
                         child: Column(
                           children: [
@@ -573,14 +593,16 @@ class _GameScreenState extends State<GameScreen> {
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(15),
-                          border: Border.all(color: Colors.white.withOpacity(0.3)),
+                          border:
+                              Border.all(color: Colors.white.withOpacity(0.3)),
                         ),
                         child: const Column(
                           children: [
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.info_outline, color: Colors.white70, size: 20),
+                                Icon(Icons.info_outline,
+                                    color: Colors.white70, size: 20),
                                 SizedBox(width: 8),
                                 Text(
                                   'How to Play',
@@ -730,23 +752,27 @@ class _GameScreenState extends State<GameScreen> {
                               ),
                               const SizedBox(height: 12),
                               ...newAchievements.map((achievement) => Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 4),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(achievement.icon, style: const TextStyle(fontSize: 24)),
-                                    const SizedBox(width: 10),
-                                    Text(
-                                      achievement.title,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 4),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text(achievement.icon,
+                                            style:
+                                                const TextStyle(fontSize: 24)),
+                                        const SizedBox(width: 10),
+                                        Text(
+                                          achievement.title,
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
-                              )),
+                                  )),
                             ],
                           ),
                         ),

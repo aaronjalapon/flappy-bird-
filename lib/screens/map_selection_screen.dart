@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../models/map_data.dart';
 import '../utils/sound_manager.dart';
 import 'achievements_screen.dart';
+import 'bird_customization_screen.dart';
 import 'custom_gravity_screen.dart';
 import 'game_screen.dart';
 
@@ -16,11 +17,12 @@ class MapSelectionScreen extends StatefulWidget {
   State<MapSelectionScreen> createState() => _MapSelectionScreenState();
 }
 
-class _MapSelectionScreenState extends State<MapSelectionScreen> with TickerProviderStateMixin {
+class _MapSelectionScreenState extends State<MapSelectionScreen>
+    with TickerProviderStateMixin {
   late PageController _pageController;
   int _currentPage = 0;
   double _currentPageValue = 0.0;
-  
+
   // List of world keys in order
   final List<String> _worldKeys = [
     'space',
@@ -52,7 +54,7 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> with TickerProv
       initialPage: _currentPage,
       viewportFraction: 0.8, // Show parts of adjacent pages
     );
-    
+
     _pageController.addListener(() {
       setState(() {
         _currentPageValue = _pageController.page ?? 0.0;
@@ -104,56 +106,108 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> with TickerProv
                       ),
                     ),
 
-                    // Achievements button (icon only)
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [
-                            Color(0xFFFFD700),
-                            Color(0xFFFFB6C1),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.yellow.withOpacity(0.4),
-                            blurRadius: 10,
-                            offset: const Offset(0, 5),
-                          ),
-                        ],
-                      ),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(16),
-                          onTap: () {
-                            SoundManager().playButton();
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const AchievementsScreen(),
+                    // Right side buttons
+                    Row(
+                      children: [
+                        // Choose Your Bird button
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [
+                                Color(0xFF8E44AD),
+                                Color(0xFFC39BD3),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.purple.withOpacity(0.4),
+                                blurRadius: 10,
+                                offset: const Offset(0, 5),
                               ),
-                            );
-                          },
-                          child: const Padding(
-                            padding: EdgeInsets.all(10),
-                            child: Icon(
-                              Icons.emoji_events,
-                              color: Colors.white,
-                              size: 20,
+                            ],
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(16),
+                              onTap: () {
+                                SoundManager().playButton();
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const BirdCustomizationScreen(),
+                                  ),
+                                );
+                              },
+                              child: const Padding(
+                                padding: EdgeInsets.all(10),
+                                child: Icon(
+                                  Icons.flutter_dash,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
+                        const SizedBox(width: 12),
+
+                        // Achievements button (icon only)
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [
+                                Color(0xFFFFD700),
+                                Color(0xFFFFB6C1),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.yellow.withOpacity(0.4),
+                                blurRadius: 10,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(16),
+                              onTap: () {
+                                SoundManager().playButton();
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const AchievementsScreen(),
+                                  ),
+                                );
+                              },
+                              child: const Padding(
+                                padding: EdgeInsets.all(10),
+                                child: Icon(
+                                  Icons.emoji_events,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 25),
-              
+
               // Title
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
@@ -162,7 +216,8 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> with TickerProv
                     ],
                   ),
                   borderRadius: BorderRadius.circular(30),
-                  border: Border.all(color: Colors.white.withOpacity(0.5), width: 2),
+                  border: Border.all(
+                      color: Colors.white.withOpacity(0.5), width: 2),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -183,14 +238,15 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> with TickerProv
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 20),
-              
+
               // Swipe hint with arrows
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.arrow_back_ios, color: Colors.white.withOpacity(0.7), size: 20),
+                  Icon(Icons.arrow_back_ios,
+                      color: Colors.white.withOpacity(0.7), size: 20),
                   const SizedBox(width: 8),
                   Text(
                     'Swipe to explore worlds',
@@ -201,12 +257,13 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> with TickerProv
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Icon(Icons.arrow_forward_ios, color: Colors.white.withOpacity(0.7), size: 20),
+                  Icon(Icons.arrow_forward_ios,
+                      color: Colors.white.withOpacity(0.7), size: 20),
                 ],
               ),
-              
+
               const SizedBox(height: 30),
-              
+
               // Carousel PageView
               Expanded(
                 child: PageView.builder(
@@ -223,9 +280,9 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> with TickerProv
                   },
                 ),
               ),
-              
+
               const SizedBox(height: 20),
-              
+
               // Page Indicators
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -234,9 +291,9 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> with TickerProv
                   (index) => _buildPageIndicator(index),
                 ),
               ),
-              
+
               const SizedBox(height: 25),
-              
+
               // Custom Gravity Button
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 30),
@@ -282,7 +339,8 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> with TickerProv
                                 color: Colors.white.withOpacity(0.3),
                                 shape: BoxShape.circle,
                               ),
-                              child: const Text('🧪', style: TextStyle(fontSize: 20)),
+                              child: const Text('🧪',
+                                  style: TextStyle(fontSize: 20)),
                             ),
                             const SizedBox(width: 10),
                             Text(
@@ -295,7 +353,8 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> with TickerProv
                               ),
                             ),
                             const SizedBox(width: 6),
-                            const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 24),
+                            const Icon(Icons.arrow_forward_rounded,
+                                color: Colors.white, size: 24),
                           ],
                         ),
                       ),
@@ -303,7 +362,7 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> with TickerProv
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 25),
             ],
           ),
@@ -311,7 +370,7 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> with TickerProv
       ),
     );
   }
-  
+
   Widget _buildPageIndicator(int index) {
     final isActive = index == _currentPage;
     return AnimatedContainer(
@@ -334,12 +393,12 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> with TickerProv
       ),
     );
   }
-  
+
   Widget _buildWorldCard(int index) {
     final worldKey = _worldKeys[index];
     final mapData = MapData.maps[worldKey]!;
     final mapImagePath = _worldMapImages[worldKey]!;
-    
+
     // Calculate scale based on distance from center
     double scale = 1.0;
     if (_pageController.position.haveDimensions) {
@@ -347,7 +406,7 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> with TickerProv
       final diff = (page - index).abs();
       scale = 1.0 - (diff * 0.2).clamp(0.0, 0.3);
     }
-    
+
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: scale, end: scale),
       duration: const Duration(milliseconds: 350),
@@ -389,7 +448,7 @@ class WorldCarouselCard extends StatefulWidget {
   State<WorldCarouselCard> createState() => _WorldCarouselCardState();
 }
 
-class _WorldCarouselCardState extends State<WorldCarouselCard> 
+class _WorldCarouselCardState extends State<WorldCarouselCard>
     with TickerProviderStateMixin {
   bool _isPressed = false;
   late AnimationController _floatController;
@@ -404,17 +463,17 @@ class _WorldCarouselCardState extends State<WorldCarouselCard>
       duration: const Duration(milliseconds: 2000),
       vsync: this,
     )..repeat(reverse: true);
-    
+
     _floatAnimation = Tween<double>(begin: -8, end: 8).animate(
       CurvedAnimation(parent: _floatController, curve: Curves.easeInOut),
     );
-    
+
     // Background scroll animation for parallax effect
     _backgroundScrollController = AnimationController(
       duration: const Duration(seconds: 20),
       vsync: this,
     )..repeat();
-    
+
     _backgroundScrollAnimation = Tween<double>(begin: 0, end: 1).animate(
       _backgroundScrollController,
     );
@@ -473,8 +532,9 @@ class _WorldCarouselCardState extends State<WorldCarouselCard>
                       return LayoutBuilder(
                         builder: (context, constraints) {
                           final imageWidth = constraints.maxWidth;
-                          final offset = _backgroundScrollAnimation.value * imageWidth;
-                          
+                          final offset =
+                              _backgroundScrollAnimation.value * imageWidth;
+
                           return Stack(
                             children: [
                               // First background image
@@ -533,7 +593,7 @@ class _WorldCarouselCardState extends State<WorldCarouselCard>
                     },
                   ),
                 ),
-                
+
                 // Semi-transparent gradient overlay for better contrast
                 Positioned.fill(
                   child: Container(
@@ -549,7 +609,7 @@ class _WorldCarouselCardState extends State<WorldCarouselCard>
                     ),
                   ),
                 ),
-                
+
                 // Animated stars background for space theme
                 if (widget.worldKey == 'space')
                   Positioned.fill(
@@ -557,12 +617,13 @@ class _WorldCarouselCardState extends State<WorldCarouselCard>
                       animation: _floatController,
                       builder: (context, child) {
                         return CustomPaint(
-                          painter: StarsPainter(animationValue: _floatAnimation.value),
+                          painter: StarsPainter(
+                              animationValue: _floatAnimation.value),
                         );
                       },
                     ),
                   ),
-                
+
                 // Floating world map PNG image
                 Center(
                   child: AnimatedBuilder(
@@ -589,7 +650,7 @@ class _WorldCarouselCardState extends State<WorldCarouselCard>
                     ),
                   ),
                 ),
-                
+
                 // Semi-transparent overlay at bottom
                 Positioned(
                   left: 0,
@@ -607,7 +668,8 @@ class _WorldCarouselCardState extends State<WorldCarouselCard>
                         ],
                       ),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
@@ -624,7 +686,8 @@ class _WorldCarouselCardState extends State<WorldCarouselCard>
                               Shadow(
                                 offset: const Offset(2, 2),
                                 blurRadius: 8,
-                                color: widget.mapData.primaryColor.withOpacity(0.8),
+                                color: widget.mapData.primaryColor
+                                    .withOpacity(0.8),
                               ),
                             ],
                           ),
@@ -632,7 +695,7 @@ class _WorldCarouselCardState extends State<WorldCarouselCard>
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 8),
-                        
+
                         // Gravity info with icon - use Wrap for better overflow handling
                         Wrap(
                           spacing: 8,
@@ -640,13 +703,15 @@ class _WorldCarouselCardState extends State<WorldCarouselCard>
                           crossAxisAlignment: WrapCrossAlignment.center,
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 5),
                               decoration: BoxDecoration(
                                 color: widget.mapData.primaryColor,
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: widget.mapData.primaryColor.withOpacity(0.5),
+                                    color: widget.mapData.primaryColor
+                                        .withOpacity(0.5),
                                     blurRadius: 6,
                                     spreadRadius: 1,
                                   ),
@@ -672,14 +737,16 @@ class _WorldCarouselCardState extends State<WorldCarouselCard>
                                 ],
                               ),
                             ),
-                            
+
                             // Play button hint
                             Container(
                               padding: const EdgeInsets.all(6),
                               decoration: BoxDecoration(
                                 color: Colors.white.withOpacity(0.2),
                                 shape: BoxShape.circle,
-                                border: Border.all(color: Colors.white.withOpacity(0.5), width: 2),
+                                border: Border.all(
+                                    color: Colors.white.withOpacity(0.5),
+                                    width: 2),
                               ),
                               child: const Icon(
                                 Icons.play_arrow_rounded,
@@ -689,9 +756,9 @@ class _WorldCarouselCardState extends State<WorldCarouselCard>
                             ),
                           ],
                         ),
-                        
+
                         const SizedBox(height: 8),
-                        
+
                         // Description
                         Text(
                           widget.mapData.description,
@@ -707,7 +774,7 @@ class _WorldCarouselCardState extends State<WorldCarouselCard>
                     ),
                   ),
                 ),
-                
+
                 // Optional: Lock icon overlay for locked worlds
                 // Uncomment when implementing unlock system
                 // if (!_isUnlocked(widget.worldKey))
@@ -719,30 +786,62 @@ class _WorldCarouselCardState extends State<WorldCarouselCard>
       ),
     );
   }
-  
+
   List<Color> _getGradientColors() {
     switch (widget.worldKey) {
       case 'space':
-        return [const Color(0xFF0F2027), const Color(0xFF203A43), const Color(0xFF2C5364)];
+        return [
+          const Color(0xFF0F2027),
+          const Color(0xFF203A43),
+          const Color(0xFF2C5364)
+        ];
       case 'moon':
-        return [const Color(0xFF2C3E50), const Color(0xFF757F9A), const Color(0xFFBDC3C7)];
+        return [
+          const Color(0xFF2C3E50),
+          const Color(0xFF757F9A),
+          const Color(0xFFBDC3C7)
+        ];
       case 'mars':
-        return [const Color(0xFFB71C1C), const Color(0xFFD32F2F), const Color(0xFFFFCDD2)];
+        return [
+          const Color(0xFFB71C1C),
+          const Color(0xFFD32F2F),
+          const Color(0xFFFFCDD2)
+        ];
       case 'venus':
-        return [const Color(0xFFF57F17), const Color(0xFFFFC107), const Color(0xFFFFF8E1)];
+        return [
+          const Color(0xFFF57F17),
+          const Color(0xFFFFC107),
+          const Color(0xFFFFF8E1)
+        ];
       case 'earth':
-        return [const Color(0xFF4A90E2), const Color(0xFF50C878), const Color(0xFF87CEEB)];
+        return [
+          const Color(0xFF4A90E2),
+          const Color(0xFF50C878),
+          const Color(0xFF87CEEB)
+        ];
       case 'saturn':
-        return [const Color(0xFFE6C300), const Color(0xFFFFEB3B), const Color(0xFFFFF9C4)];
+        return [
+          const Color(0xFFE6C300),
+          const Color(0xFFFFEB3B),
+          const Color(0xFFFFF9C4)
+        ];
       case 'neptune':
-        return [const Color(0xFF0D47A1), const Color(0xFF2196F3), const Color(0xFFBBDEFB)];
+        return [
+          const Color(0xFF0D47A1),
+          const Color(0xFF2196F3),
+          const Color(0xFFBBDEFB)
+        ];
       case 'jupiter':
-        return [const Color(0xFFE65100), const Color(0xFFFF9800), const Color(0xFFFFE0B2)];
+        return [
+          const Color(0xFFE65100),
+          const Color(0xFFFF9800),
+          const Color(0xFFFFE0B2)
+        ];
       default:
         return [Colors.blue, Colors.purple];
     }
   }
-  
+
   /* Optional method for locked worlds - uncomment when implementing unlock system
   Widget _buildLockedOverlay() {
     return Positioned.fill(
@@ -790,9 +889,9 @@ class _WorldCarouselCardState extends State<WorldCarouselCard>
 // Updated Stars Painter with animation
 class StarsPainter extends CustomPainter {
   final double animationValue;
-  
+
   StarsPainter({this.animationValue = 0});
-  
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
@@ -804,20 +903,22 @@ class StarsPainter extends CustomPainter {
       final x = random.nextDouble() * size.width;
       final y = random.nextDouble() * size.height;
       final radius = random.nextDouble() * 1.5 + 0.5;
-      
+
       // Add slight movement to stars
       final offsetY = (i % 2 == 0 ? 1 : -1) * animationValue * 0.1;
-      
+
       canvas.drawCircle(
         Offset(x, y + offsetY),
         radius,
-        paint..color = Colors.white.withOpacity(0.3 + random.nextDouble() * 0.6),
+        paint
+          ..color = Colors.white.withOpacity(0.3 + random.nextDouble() * 0.6),
       );
     }
   }
 
   @override
-  bool shouldRepaint(StarsPainter oldDelegate) => oldDelegate.animationValue != animationValue;
+  bool shouldRepaint(StarsPainter oldDelegate) =>
+      oldDelegate.animationValue != animationValue;
 }
 
 // Keep old custom painter classes for potential future use
@@ -864,8 +965,10 @@ class StormPainter extends CustomPainter {
     final path = Path();
     path.moveTo(0, size.height * 0.5);
     path.quadraticBezierTo(
-      size.width * 0.5, size.height * 0.3,
-      size.width, size.height * 0.5,
+      size.width * 0.5,
+      size.height * 0.3,
+      size.width,
+      size.height * 0.5,
     );
     canvas.drawPath(path, paint);
   }
@@ -884,12 +987,16 @@ class MarsDesertPainter extends CustomPainter {
     final path = Path();
     path.moveTo(0, size.height * 0.7);
     path.quadraticBezierTo(
-      size.width * 0.25, size.height * 0.6,
-      size.width * 0.5, size.height * 0.7,
+      size.width * 0.25,
+      size.height * 0.6,
+      size.width * 0.5,
+      size.height * 0.7,
     );
     path.quadraticBezierTo(
-      size.width * 0.75, size.height * 0.8,
-      size.width, size.height * 0.7,
+      size.width * 0.75,
+      size.height * 0.8,
+      size.width,
+      size.height * 0.7,
     );
     path.lineTo(size.width, size.height);
     path.lineTo(0, size.height);
@@ -977,8 +1084,10 @@ class NeptuneStormPainter extends CustomPainter {
     final path = Path();
     path.moveTo(size.width * 0.3, size.height * 0.6);
     path.quadraticBezierTo(
-      size.width * 0.5, size.height * 0.5,
-      size.width * 0.7, size.height * 0.65,
+      size.width * 0.5,
+      size.height * 0.5,
+      size.width * 0.7,
+      size.height * 0.65,
     );
     canvas.drawPath(path, swirl);
   }
@@ -986,4 +1095,3 @@ class NeptuneStormPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
-
