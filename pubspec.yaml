@@ -49,4 +49,4 @@ flutter:
     - assets/audio/world_backgrounds/
     - assets/audio/world_maps/
     - assets/icons/
-    - assets/images/
+    # - assets/images/
